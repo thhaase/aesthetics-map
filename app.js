@@ -474,6 +474,12 @@ function bindViewportEvents() {
   }, { passive: true });
 
   canvas.addEventListener('touchend', e => {
+    // When releasing one finger of a pinch, sync lastTouchX/Y to the remaining finger
+    // so the next single-finger touchmove doesn't jump
+    if (e.touches.length === 1) {
+      lastTouchX = e.touches[0].clientX;
+      lastTouchY = e.touches[0].clientY;
+    }
     // Only fire click if finger didn't move
     if (!touchMoved && e.changedTouches.length === 1) {
       const t = e.changedTouches[0];
