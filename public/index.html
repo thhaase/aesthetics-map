@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Aesthetics Map</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- Loading screen -->
+  <div id="loading">
+    <div class="loading-inner">
+      <h1 class="loading-title">Aesthetics Map</h1>
+      <p class="loading-sub">mapping the vibeverse…</p>
+      <div class="loading-bar"><div class="loading-fill" id="loading-fill"></div></div>
+    </div>
+  </div>
+
+  <!-- Search -->
+  <div id="search-wrap">
+    <input id="search" type="text" placeholder="search aesthetics…" autocomplete="off" spellcheck="false" />
+    <div id="search-results"></div>
+  </div>
+
+  <!-- Tooltip -->
+  <div id="tooltip"></div>
+
+  <!-- Side panel -->
+  <div id="panel">
+    <button id="panel-close" aria-label="close">✕</button>
+    <div id="panel-content"></div>
+  </div>
+
+  <!-- Zoom hint -->
+  <div id="hint">scroll to zoom · drag to pan · click a node to explore</div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/7.3.2/pixi.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

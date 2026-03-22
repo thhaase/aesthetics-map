@@ -1,0 +1,13 @@
+# R artifacts
+.RData
+.Rhistory
+*.rds
+
+# Large raw data files (reproduced by scraper.R)
+aesthetics_wiki_data.csv
+aesthetics_wiki_data.parquet
+
+# Python
+__pycache__/
+*.pyc
+.venv/
