@@ -21,8 +21,40 @@
 
   <!-- Search -->
   <div id="search-wrap">
-    <input id="search" type="text" placeholder="search aesthetics…" autocomplete="off" spellcheck="false" />
+    <div id="search-row">
+      <input id="search" type="text" placeholder="search aesthetics…" autocomplete="off" spellcheck="false" />
+      <button id="info-btn" aria-label="About this map">?</button>
+    </div>
     <div id="search-results"></div>
+  </div>
+
+  <!-- Info popup -->
+  <div id="info-overlay">
+    <div id="info-modal">
+      <button id="info-close" aria-label="close">✕</button>
+      <h2 class="info-title">Aesthetics Map</h2>
+      <p class="info-lead">An interactive map of 1,031 aesthetic styles scraped from the <a href="https://aesthetics.fandom.com" target="_blank">Aesthetics Wiki</a> — laid out so that similar aesthetics appear close together.</p>
+
+      <h3 class="info-section">How positions work</h3>
+      <p>Two signals pull aesthetics toward each other: <strong>links</strong> (pages that reference each other in their infoboxes) and <strong>text similarity</strong> (pages that describe themselves in similar language). Both are blended into a single distance and compressed into 2D using UMAP.</p>
+
+      <h3 class="info-section">Colors &amp; regions</h3>
+      <p>The colored territories are broad clusters found automatically by the Louvain community detection algorithm. Every aesthetic inherits its color from its cluster. The colored region names that appear as you zoom in are chosen to be <em>distinctive</em> — a label is picked only if it characterizes that cluster more than any other.</p>
+
+      <h3 class="info-section">How to explore</h3>
+      <ul class="info-list">
+        <li><strong>Scroll</strong> — zoom in / out</li>
+        <li><strong>Drag</strong> — pan around</li>
+        <li><strong>Click a node</strong> — open a side panel with the full article</li>
+        <li><strong>Click a chip</strong> in the panel — fly to that aesthetic</li>
+        <li><strong>Search bar</strong> — find any aesthetic by name</li>
+      </ul>
+
+      <h3 class="info-section">Nodes &amp; edges</h3>
+      <p>Node size reflects how many connections an aesthetic has. Edges are drawn between pages that reference each other; stronger or bidirectional links have higher weight and pull nodes closer together. There are <strong>5,307 edges</strong> total across the 1,031 nodes.</p>
+
+      <a class="info-readme" href="https://github.com/thhaase/aesthetics-map#readme" target="_blank">Full technical README →</a>
+    </div>
   </div>
 
   <!-- Tooltip -->

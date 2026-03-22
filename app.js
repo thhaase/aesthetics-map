@@ -14,7 +14,7 @@ const EDGE_ALPHA    = 0.07;   // base edge opacity
 const GLITTER_COUNT = 180;
 
 // Zoom scale thresholds (world→screen transform scale)
-const ZOOM = { L1: 0.15, L2: 0.28, NODES: 0.85 };
+const ZOOM = { L1: 0.15, L2: 0.50, NODES: 0.85 };
 // L1 labels: scale 0.15 → 0.28
 // L2 labels: scale 0.28 → 2.2  (wide window — readable from mid-zoom all the way in)
 // Node names: scale 0.85 →  ∞  (overlaps with L2 intentionally)
@@ -31,7 +31,7 @@ const PALETTE = [
 const LABEL_STYLES = {
   l1:   { fontFamily: 'Cormorant Garamond', fontSize: 28, fontWeight: '600',
           fill: 0xffffff, alpha: 0.82 },
-  l2:   { fontFamily: 'Quicksand', fontSize: 14, fontWeight: '600',
+  l2:   { fontFamily: 'Quicksand', fontSize: 18, fontWeight: '600',
           alpha: 0.72 },         // fill set per-label from community color
   node: { fontFamily: 'Quicksand', fontSize: 9, fontWeight: '500',
           fill: 0xffffff, alpha: 0.55 },
@@ -120,15 +120,15 @@ async function boot() {
     const r   = NODE_BASE_R + (NODE_MAX_R - NODE_BASE_R) * Math.sqrt(n.degree_norm);
     const col = nodeColorMap[n.id];
     // Wide soft halo (territory colour)
-    densityGfx.beginFill(col, 0.038);
-    densityGfx.drawCircle(n.x * WORLD_SCALE, n.y * WORLD_SCALE, r * 22);
+    densityGfx.beginFill(col, 0.045);
+    densityGfx.drawCircle(n.x * WORLD_SCALE, n.y * WORLD_SCALE, r * 32);
     densityGfx.endFill();
     // Tighter inner glow (cluster core brightness)
-    densityGfx.beginFill(col, 0.12);
-    densityGfx.drawCircle(n.x * WORLD_SCALE, n.y * WORLD_SCALE, r * 7);
+    densityGfx.beginFill(col, 0.13);
+    densityGfx.drawCircle(n.x * WORLD_SCALE, n.y * WORLD_SCALE, r * 10);
     densityGfx.endFill();
   });
-  densityGfx.filters = [new PIXI.filters.BlurFilter(48, 2)];
+  densityGfx.filters = [new PIXI.filters.BlurFilter(80, 2)];
 
   // Bake to texture at 25% resolution — plenty for a blurry background
   const lb      = densityGfx.getLocalBounds();
@@ -300,7 +300,7 @@ function buildLabels(communities) {
       fontFamily: s.fontFamily, fontSize: s.fontSize, fontWeight: s.fontWeight,
       fill: parentColor, align: 'center',
       dropShadow: true, dropShadowColor: 0x000000,
-      dropShadowAlpha: 0.8, dropShadowDistance: 2,
+      dropShadowAlpha: 1.0, dropShadowDistance: 0, dropShadowBlur: 6,
     });
     text.anchor.set(0.5, 0.5);
     text.position.set(c.cx * WORLD_SCALE, c.cy * WORLD_SCALE);
@@ -419,32 +419,73 @@ function bindViewportEvents() {
 
   window.addEventListener('mouseup', () => { isDragging = false; });
 
-  // Touch pinch
-  let lastDist = 0;
+  // Touch — single finger pan + two finger pinch-zoom-pan
+  let lastTouchX = 0, lastTouchY = 0;
+  let lastDist = 0, lastMidX = 0, lastMidY = 0;
+  let touchMoved = false;
+
   canvas.addEventListener('touchstart', e => {
     hideHint();
-    if (e.touches.length === 2) {
+    clearFly();
+    touchMoved = false;
+    if (e.touches.length === 1) {
+      lastTouchX = e.touches[0].clientX;
+      lastTouchY = e.touches[0].clientY;
+    } else if (e.touches.length === 2) {
       lastDist = Math.hypot(
         e.touches[0].clientX - e.touches[1].clientX,
         e.touches[0].clientY - e.touches[1].clientY
       );
+      lastMidX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+      lastMidY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
     }
   }, { passive: true });
 
   canvas.addEventListener('touchmove', e => {
-    if (e.touches.length === 2) {
+    touchMoved = true;
+    if (e.touches.length === 1) {
+      const dx = e.touches[0].clientX - lastTouchX;
+      const dy = e.touches[0].clientY - lastTouchY;
+      vpX += dx;
+      vpY += dy;
+      lastTouchX = e.touches[0].clientX;
+      lastTouchY = e.touches[0].clientY;
+      updateTransform();
+    } else if (e.touches.length === 2) {
       const dist = Math.hypot(
         e.touches[0].clientX - e.touches[1].clientX,
         e.touches[0].clientY - e.touches[1].clientY
       );
+      const midX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+      const midY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
       const factor = dist / lastDist;
-      const cx = (e.touches[0].clientX + e.touches[1].clientX) / 2;
-      const cy = (e.touches[0].clientY + e.touches[1].clientY) / 2;
-      vpX = cx - (cx - vpX) * factor;
-      vpY = cy - (cy - vpY) * factor;
+      // zoom around midpoint
+      vpX = midX - (midX - vpX) * factor;
+      vpY = midY - (midY - vpY) * factor;
       vpScale = Math.max(0.04, Math.min(vpScale * factor, 30));
+      // pan with midpoint movement
+      vpX += midX - lastMidX;
+      vpY += midY - lastMidY;
       lastDist = dist;
+      lastMidX = midX;
+      lastMidY = midY;
       updateTransform();
+    }
+  }, { passive: true });
+
+  canvas.addEventListener('touchend', e => {
+    // Only fire click if finger didn't move
+    if (!touchMoved && e.changedTouches.length === 1) {
+      const t = e.changedTouches[0];
+      const worldX = (t.clientX - vpX) / vpScale;
+      const worldY = (t.clientY - vpY) / vpScale;
+      let best = null, bestD = Infinity;
+      nodeObjects.forEach(obj => {
+        const d = Math.hypot(obj.wx - worldX, obj.wy - worldY);
+        const r = NODE_BASE_R + (NODE_MAX_R - NODE_BASE_R) * Math.sqrt(obj.data.degree_norm);
+        if (d < Math.max(r * 1.5, 12) && d < bestD) { bestD = d; best = obj; }
+      });
+      if (best) onNodeClick(best.data);
     }
   }, { passive: true });
 }
@@ -618,6 +659,11 @@ function closePanel() {
 
 function bindPanelEvents() {
   document.getElementById('panel-close').addEventListener('click', closePanel);
+
+  const overlay = document.getElementById('info-overlay');
+  document.getElementById('info-btn').addEventListener('click', () => overlay.classList.add('open'));
+  document.getElementById('info-close').addEventListener('click', () => overlay.classList.remove('open'));
+  overlay.addEventListener('click', e => { if (e.target === overlay) overlay.classList.remove('open'); });
 }
 
 // ── Search ────────────────────────────────────────────────────────────────────
