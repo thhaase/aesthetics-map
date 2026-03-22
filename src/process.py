@@ -23,8 +23,8 @@ warnings.filterwarnings("ignore")
 # ── Config ────────────────────────────────────────────────────────────────────
 
 DATA_PATH  = "aesthetics_wiki_data.csv"
-NODES_OUT  = "public/nodes.json"
-EDGES_OUT  = "public/edges.json"
+NODES_OUT  = "nodes.json"
+EDGES_OUT  = "edges.json"
 
 EDGE_WEIGHTS = {
     "relatedaesthetics": 1.0,

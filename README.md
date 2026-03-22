@@ -184,18 +184,20 @@ Built with [Pixi.js v7](https://pixijs.com/) (WebGL).
 
 ## Reproduction
 
+Scripts must be run from the **repo root** so they read/write `nodes.json` and `edges.json` in the right place.
+
 ```bash
 # 1. Scrape the wiki
-Rscript scraper.R
+Rscript src/scraper.R
 
 # 2. Compute layout + communities
-python3 process.py
+python3 src/process.py
 
 # 3. Fetch cover images
-python3 fetch_images.py
+python3 src/fetch_images.py
 
 # 4. Serve locally
-cd public && python3 -m http.server 8765
+python3 -m http.server 8765
 ```
 
 Dependencies: `R` (httr, XML, tidyverse, jsonlite, arrow), `python3` (networkx, umap-learn, scikit-learn, python-louvain, fa2, pandas, numpy, requests).
@@ -206,15 +208,14 @@ Dependencies: `R` (httr, XML, tidyverse, jsonlite, arrow), `python3` (networkx, 
 
 ```
 .
-├── scraper.R                  # Wiki scraper (R)
-├── process.py                 # Layout + community pipeline (Python)
-├── fetch_images.py            # Cover image URL fetcher (Python)
-├── aesthetics_wiki_data.csv   # Raw scraped data
-├── public/
-│   ├── index.html             # App shell
-│   ├── style.css              # Vaporwave design system
-│   ├── app.js                 # Pixi.js visualization
-│   ├── nodes.json             # Node positions, communities, infobox data
-│   └── edges.json             # Edge list with weights
+├── index.html                 # App shell
+├── style.css                  # Vaporwave design system
+├── app.js                     # Pixi.js visualization
+├── nodes.json                 # Node positions, communities, infobox data
+├── edges.json                 # Edge list with weights
+├── src/
+│   ├── scraper.R              # Wiki scraper (R)
+│   ├── process.py             # Layout + community pipeline (Python)
+│   └── fetch_images.py        # Cover image URL fetcher (Python)
 └── README.md
 ```

@@ -10,7 +10,7 @@ API = "https://aesthetics.fandom.com/api.php"
 BATCH = 50
 DELAY = 1.5
 
-with open("public/nodes.json") as f:
+with open("nodes.json") as f:
     data = json.load(f)
 
 nodes = data["nodes"]
@@ -55,6 +55,6 @@ for n in nodes:
 covered = sum(1 for n in nodes if "image_url" in n)
 print(f"\n✓ {covered}/{len(nodes)} nodes have a cover image")
 
-with open("public/nodes.json", "w") as f:
+with open("nodes.json", "w") as f:
     json.dump(data, f, separators=(",", ":"))
-print("✓ Saved public/nodes.json")
+print("✓ Saved nodes.json")
